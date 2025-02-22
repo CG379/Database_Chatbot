@@ -1,6 +1,7 @@
 import tiktoken
 import streamlit as st
 from utils.api_funs import send_api_request, execute_fun
+from utils.config import AI_MODEL
 
 def run_chat(messages, funs):
     if "live_chat" not in st.session_state:
@@ -13,8 +14,19 @@ def run_chat(messages, funs):
         internal_chat_history.append({"role": "system", "content": system_message})
 
 
+def prep_menuebar_data(db_schema_dict):
+    # Prepare the data for the menubar
+    menubar_data = {}
+    for table in db_schema_dict:
+        schema_name = table["schema_name"]
+        table_name = table["table_name"]
+        col_names = table["column_names"]
 
-
+        if schema_name not in menubar_data:
+            menubar_data[schema_name] = {}
+        
+        menubar_data[schema_name][table_name] = col_names
+    return menubar_data
 
 def clear_chat_history():
     """ Clear the chat history stored in the Streamlit session state """
@@ -32,3 +44,5 @@ def count_tokens(text):
     total_tokens = len(encoding.encode(text))
 
     return total_tokens
+
+
