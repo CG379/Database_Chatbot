@@ -1,10 +1,19 @@
 import streamlit as st
 # Use 4o-mini 3 requests perr minute
+from utils.config import MAX_TOKENS_ALLOWED, MAX_MESSAGES_TO_OPENAI, TOKEN_BUFFER
+from utils.chat_funs import run_chat, count_tokens, prep_menuebar_data, clear_chat_history
+from utils.system_prompts import get_final_prompt
+from utils.fun_calling import funs
+from utils.helper_funs import save_conv_history
+from utils.db_funs import db_schema_dict
+
 
 if __name__ == '__main__':
+    # TODO: Connect to db
+    
     # Menu bar
-    menu_bar = get_data()# get data for menue bar
-    # add watermark later
+    # TODO: Make fun for preping menue bar data
+    menu_bar = prep_menuebar_data(db_schema_dict)
     
 
     ## Postgress database viewer
@@ -23,16 +32,16 @@ if __name__ == '__main__':
     ## Button for saving convo
     if st.sidebar.button("Save Conversation"):
         # Save conversation: st.session_state["full_chat_history"]
-        path = ... # TODO: save conversation function
-        st.sidebar.success(f"Conversation saved at {path}")
-        st.sidebar.markdown(f"Download here: [Open Conversation]({path})")
+        saved_file_path = save_conv_history(st.session_state["full_chat_history"])
+        st.sidebar.success(f"Conversation saved in {saved_file_path}")
+        st.sidebar.markdown(f"Download here: [Open Conversation]({saved_file_path})")
 
     ## clear chat button
-    if st.sidebar.button("Clear Chat"):
-        # save conversation: st.session_state["full_chat_history"]
-        # TODO: save conversation function
-        # TODO: clear chat function
-        pass
+    if st.sidebar.button("Clear Chat"): 
+        # save conversation 
+        save_conv_history(st.session_state["full_chat_history"])
+        # clear chat 
+        clear_chat_history()
 
 
     ### Chat interface
@@ -40,22 +49,18 @@ if __name__ == '__main__':
 
     # System state: added so I can use general prompt
     if "full_chat_history" not in st.session_state:
-        # TODO: Add general prompt, make into function?
-        temp = "Hello, you are a chatbot to help the user look through their databases"
-        st.session_state["full_chat_history"] = [{"role": "system", "content": temp}]
+        st.session_state["full_chat_history"] = [{"role": "system", "content": get_final_prompt(db_creds)}]
 
     # For API history
     if "api_chat_history" not in st.session_state:
         # TODO: Add general prompt, make into function?
-        temp = "Hello, you are a chatbot to help the user look through their databases"
-        st.session_state["api_chat_history"] = [{"role": "system", "content": temp}]
+        st.session_state["full_chat_history"] = [{"role": "system", "content": get_final_prompt(db_creds)}]
 
     ### Chat 
     # Start
     if (prompt := st.chat_input("What would you like to know?")) is not None:
         st.session_state.full_chat_history.append({"role": "user", "content": prompt})
 
-        # TODO: make count tokens function
         # Limit the number of messages sent to OpenAI by token count
         total_tokens = sum(count_tokens(message["content"]) for message in st.session_state["api_chat_history"])
         while total_tokens + count_tokens(prompt) + TOKEN_BUFFER > MAX_TOKENS_ALLOWED:
@@ -72,14 +77,12 @@ if __name__ == '__main__':
             st.chat_message(f"System: ").write(message['content'])
 
     # TODO: Come up with better name than assistant
-    if st.session_state["api_chat_history"][-1]["role"] != "assistant":
+    if st.session_state["api_chat_history"][-1]["role"] != "system":
         with st.spinner("Connecting to model..."):
             # Send onlt most recent messages to reduce tokens
-            # TODO: Set max messages
             recent_messages = st.session_state["api_chat_history"][-MAX_MESSAGES_TO_OPENAI:]
             # get latest message
-            # TODO: Make run chat function
-            new_message = run_chat_sequence(recent_messages, functions)
+            new_message = run_chat(recent_messages, funs)
 
             # Add to latest message to api chat and full chat
             st.session_state["api_chat_history"].append(new_message)
@@ -89,9 +92,7 @@ if __name__ == '__main__':
             st.chat_message("System: ").write(new_message["context"])
         
         ## Show how much left
-        # TODO: Set max tokens
         max_tokens = MAX_TOKENS_ALLOWED
-        # TODO: make count tokens function
         current_tokens = sum(count_tokens(message["content"] for message in st.session_state["full_chat_history"]))
         progress = min(1, max(0, current_tokens/max_tokens))
         st.progress(progress)
