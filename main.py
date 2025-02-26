@@ -1,6 +1,6 @@
 import streamlit as st
 # Use 4o-mini 3 requests perr minute
-from utils.config import MAX_TOKENS_ALLOWED, MAX_MESSAGES_TO_OPENAI, TOKEN_BUFFER
+from utils.config import MAX_TOKENS_ALLOWED, MAX_MESSAGES_TO_OPENAI, TOKEN_BUFFER, db_credentials
 from utils.chat_funs import run_chat, count_tokens, prep_menuebar_data, clear_chat_history
 from utils.system_prompts import get_final_prompt
 from utils.fun_calling import funs
@@ -49,12 +49,12 @@ if __name__ == '__main__':
 
     # System state: added so I can use general prompt
     if "full_chat_history" not in st.session_state:
-        st.session_state["full_chat_history"] = [{"role": "system", "content": get_final_prompt(db_creds)}]
+        st.session_state["full_chat_history"] = [{"role": "system", "content": get_final_prompt(db_credentials)}]
 
     # For API history
     if "api_chat_history" not in st.session_state:
         # TODO: Add general prompt, make into function?
-        st.session_state["full_chat_history"] = [{"role": "system", "content": get_final_prompt(db_creds)}]
+        st.session_state["full_chat_history"] = [{"role": "system", "content": get_final_prompt(db_credentials)}]
 
     ### Chat 
     # Start
@@ -84,7 +84,7 @@ if __name__ == '__main__':
             # get latest message
             new_message = run_chat(recent_messages, funs)
 
-            # Add to latest message to api chat and full chat
+            # Add to latest message
             st.session_state["api_chat_history"].append(new_message)
             st.session_state["full_chat_history"].append(new_message)
 
