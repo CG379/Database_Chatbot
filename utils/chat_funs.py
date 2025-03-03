@@ -12,6 +12,7 @@ def run_chat(messages, funs):
 
     if system_message["role"] == "system":
         internal_chat_history.append({"role": "system", "content": system_message})
+    return system_message
 
 
 def prep_menuebar_data(db_schema_dict):
