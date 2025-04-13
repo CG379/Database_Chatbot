@@ -1,6 +1,6 @@
 import psycopg2
 import streamlit as st
-from config import db_credentials
+from utils.config import db_credentials
 
 GENERAL_PROMPT = """
 You are an AI PostgreSQL SQL specialist. Your task is to decode user inquiries, create precise SQL scripts, run them, and succinctly display the results. Maintain this persona throughout all communications.

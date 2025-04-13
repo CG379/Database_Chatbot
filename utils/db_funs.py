@@ -3,7 +3,14 @@ from utils.config import db_credentials
 
 # get db connection 
 try:
-    # TODO: Add creds
+    # TODO: make case for no db yet
+    db_connection = psycopg2.connect(
+            host=db_credentials['host'],
+            user=db_credentials['user'],
+            password=db_credentials['password'],
+            port=db_credentials['port'],
+            database=db_credentials['default_db']
+        )
     db_connection = psycopg2.connect()
     db_connection.set_session(autocommit=True)
 except Exception as e:
@@ -116,7 +123,7 @@ def create_db(name):
 
         conn.commit()
         print("Table created successfully!")
-        
+
         # Example data import function
         def import_data_from_api(table_name, data):
             """Import data into specified table"""
@@ -177,3 +184,17 @@ def drop_database():
 
     except psycopg2.Error as e:
         return f"Failed to drop database: {str(e)}"
+
+
+
+# To print details to the console:
+# schemas = get_schema_names(postgres_connection)
+# here you need to set schema name from postgres by default the schema is public in postgres database. you can see in pgadmin
+schemas = ['public']
+db_schema_dict = get_db_info(db_connection, schemas)
+database_schema_string = "\n".join(
+    [
+        f"Schema: {table['schema_name']}\nTable: {table['table_name']}\nColumns: {', '.join(table['column_names'])}"
+        for table in db_schema_dict
+    ]
+)

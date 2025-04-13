@@ -7,6 +7,7 @@ from utils.fun_calling import funs
 from utils.helper_funs import save_conv_history
 from utils.db_funs import db_schema_dict
 
+#TODO: Fix for no existing database case
 
 if __name__ == '__main__':
     # TODO: Connect to db
@@ -15,9 +16,14 @@ if __name__ == '__main__':
     # TODO: Make fun for preping menue bar data
     menu_bar = prep_menuebar_data(db_schema_dict)
     
+    # TODO: Make button for importing data and creating table
+    with st.popover("Import Data"):
+        st.markdown("Import data from a CSV file to create a new table in the database.")
+
+
 
     ## Postgress database viewer
-
+    
     st.sidebar.title("Database Viewer")
     # Dropdown menue
     selected_schema = st.sidebar.selectbox("Select Schema", list(menu_bar.keys()))

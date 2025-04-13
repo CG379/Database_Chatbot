@@ -1,12 +1,12 @@
 import json
 import requests 
 from tenacity import retry, wait_random_exponential, stop_after_attempt
-from utils.config import AI_MODEL, OPENAI_KEY
+from utils.config import AI_MODEL, OPENAI_API_KEY
 from utils.db_funs import execute_query, db_connection
 
 # Exponential backoff
 @retry(wait=wait_random_exponential(min=1, max=50), stop=stop_after_attempt(3))
-def send_api_request(messages, functions=None, function_call=None, model=AI_MODEL, api_key=OPENAI_KEY):
+def send_api_request(messages, functions=None, function_call=None, model=AI_MODEL, api_key=OPENAI_API_KEY):
     """
     Send a request to the OpenAI API
     """

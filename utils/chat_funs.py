@@ -40,7 +40,6 @@ def count_tokens(text):
     # In case this breaks
     if not isinstance(text, str):
         return 0
-    # TODO: make model a global var or env file var or something
     encoding = tiktoken.encode_for_model(AI_MODEL)
     total_tokens = len(encoding.encode(text))
 
