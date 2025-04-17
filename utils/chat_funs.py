@@ -40,9 +40,13 @@ def count_tokens(text):
     # In case this breaks
     if not isinstance(text, str):
         return 0
-    encoding = tiktoken.encode_for_model(AI_MODEL)
-    total_tokens = len(encoding.encode(text))
-
-    return total_tokens
+    try:
+        # Use cl100k_base encoding which is used by GPT-4
+        encoding = tiktoken.get_encoding("cl100k_base")
+        total_tokens = len(encoding.encode(text))
+        return total_tokens
+    except Exception as e:
+        print(f"Error counting tokens: {e}")
+        return 0
 
 
